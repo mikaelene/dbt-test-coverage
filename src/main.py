@@ -19,7 +19,7 @@ def main():
         recursive = True
 
     print("")
-    print("Running src " + get_distribution("dbt-test-coverage").version)
+    print("Running dbt-test-coverage " + get_distribution("dbt-test-coverage").version)
     print("")
 
     try:
