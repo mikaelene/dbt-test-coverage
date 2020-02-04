@@ -133,9 +133,9 @@ def parse_schema(schema):
 
 def test_coverage(path, recursive=True):
     if recursive:
-        schema_path = f"{path}/**\*.yml"
+        schema_path = f"{path}/**/*.yml"
     else:
-        schema_path = f"{path}\*.yml"
+        schema_path = f"{path}/*.yml"
 
     ymls = glob.glob(schema_path, recursive=recursive)
 
