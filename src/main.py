@@ -7,7 +7,8 @@ from pkg_resources import get_distribution
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--recursive", help="If you want to search sub directories for yml-files (default: True)"
+        "--recursive",
+        help="If you want to search sub directories for yml-files (default: True)",
     )
 
     args = parser.parse_args()
@@ -18,13 +19,11 @@ def main():
         recursive = True
 
     print("")
-    print("Running src " + get_distribution('dbt-test-coverage').version)
+    print("Running src " + get_distribution("dbt-test-coverage").version)
     print("")
 
     try:
-        dbt_test_coverage.test_coverage(
-            os.getcwd(), recursive=recursive
-        )
+        dbt_test_coverage.test_coverage(os.getcwd(), recursive=recursive)
     except KeyboardInterrupt:
         print("Interupted by user")
 

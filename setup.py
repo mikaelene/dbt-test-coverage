@@ -13,15 +13,11 @@ setup(
     version=package_version,
     description=description,
     long_description=description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     author="Mikael Ene",
     author_email="mikael.ene@gmail.com",
     url="https://github.com/mikaelene/dbt-test-coverage",
     packages=find_packages(),
-    install_requires=[
-        'PyYAML>=3.11',
-    ],
-    entry_points={
-            'console_scripts': ['dbt-test-coverage=src.main:main'],
-        },
+    install_requires=["PyYAML>=3.11",],
+    entry_points={"console_scripts": ["dbt-test-coverage=src.main:main"],},
 )
