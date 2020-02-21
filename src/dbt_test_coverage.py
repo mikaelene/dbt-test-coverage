@@ -1,6 +1,9 @@
 import glob
 import yaml
 import os
+import colorama
+from colorama import init, Fore, Back, Style
+colorama.init()
 
 
 def load_yaml(stream):
@@ -82,7 +85,8 @@ def parse_models(schema):
         if "'tests':" in str(model):
             model_test = True
         # print(f"Model name: {model_name}, tested: {model_test}" )
-        test_status.append([model_name, model_test])
+       # test_status.append([model_name, model_test])
+        test_status.append(model_name)
 
     # Calculate aggregated test status
     statuses = 0
@@ -131,19 +135,86 @@ def parse_schema(schema):
     print("\n")
 
 
+def parse_schema_2(schema):
+    try:
+        models = {}
+        for model in schema["models"]:
+            name = model["name"]
+            if "'tests':" in str(model):
+                tested = True
+            else:
+                tested = False
+            models.update({name : tested})
+        return models
+    except:
+        print(f"Parse {schema} Failed")
+
+
 def test_coverage(path, recursive=True):
     if recursive:
         schema_path = f"{path}/**/*.yml"
+        sql_path = f"{path}/**/*.sql"
     else:
         schema_path = f"{path}/*.yml"
+        sql_path = f"{path}/*.sql"
 
     ymls = glob.glob(schema_path, recursive=recursive)
+    sqls = glob.glob(sql_path, recursive=recursive)
+    sql_models = []
+    for sql_file_list in sqls:
+        sql_files = os.path.basename(sql_file_list)
+        sql_models.append(sql_files[:-4])
 
     if not ymls:
         print(f"No schema files found in: {path}")
         return
-
     for yml in ymls:
-        print(yml)
         schema = load_schema_yml(yml)
-        parse_schema(schema)
+        yml_models = parse_schema_2(schema)
+
+    compare_file(sql_models, yml_models)
+
+    return sql_models,yml_models
+
+
+
+
+
+
+def compare_file(sql_models, yml_models):
+    models = 0
+    docs = 0
+    test = 0
+    model_col_width = 40
+    docs_col_width = 10
+    docs_true = "True"
+    docs_false = "False"
+
+    for item in sql_models:
+        models += 1
+        if item in yml_models:
+            if yml_models.get(item):
+                tested = "True"
+                print (f" Models: {item: <{model_col_width}}Docs: " + Fore.GREEN + f"{docs_true: <{docs_col_width}}" + Style.RESET_ALL + f"   Tests: " + Fore.GREEN + f"{tested}" + Style.RESET_ALL)
+                test +=1
+            else:
+                tested = "False"
+                print (f" Models: {item: <{model_col_width}}Docs: " + Fore.GREEN + f"{docs_true: <{docs_col_width}}" + Style.RESET_ALL + f"   Tests: " + Fore.RED + f"{tested}" + Style.RESET_ALL)
+            docs += 1
+        else:
+            if not yml_models.get(item):
+                tested ="False"
+                print (f" Models: {item: <{model_col_width}}Docs: "+ Fore.RED + f"{docs_false: <{docs_col_width}}" + Style.RESET_ALL + f"   Tests: " + Fore.RED + f"{tested}" + Style.RESET_ALL)
+    print(" ")
+    #print (f" Models: {models}, Docs: {docs}, DocsCoverage: {round((docs /models) *100)}% Tests: {test}, TestsCoverage: {round((test /models) *100)}%")
+    print (f" Models: {models: <{model_col_width}}Docs: {docs} ({round((docs /models) *100)}%)    Tests: {test} ({round((test /models) *100)}%) ")
+
+
+
+
+
+
+
+
+
+
