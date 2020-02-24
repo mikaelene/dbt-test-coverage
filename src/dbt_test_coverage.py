@@ -3,6 +3,7 @@ import yaml
 import os
 import colorama
 from colorama import init, Fore, Back, Style
+
 colorama.init()
 
 
@@ -85,7 +86,7 @@ def parse_models(schema):
         if "'tests':" in str(model):
             model_test = True
         # print(f"Model name: {model_name}, tested: {model_test}" )
-       # test_status.append([model_name, model_test])
+        # test_status.append([model_name, model_test])
         test_status.append(model_name)
 
     # Calculate aggregated test status
@@ -144,7 +145,7 @@ def parse_schema_2(schema):
                 tested = True
             else:
                 tested = False
-            models.update({name : tested})
+            models.update({name: tested})
         return models
     except:
         print(f"Parse {schema} Failed")
@@ -168,53 +169,67 @@ def test_coverage(path, recursive=True):
     if not ymls:
         print(f"No schema files found in: {path}")
         return
+    yml_models = {}
     for yml in ymls:
         schema = load_schema_yml(yml)
-        yml_models = parse_schema_2(schema)
+        yml_model = parse_schema_2(schema)
+        yml_models = {**yml_models, **yml_model}
 
     compare_file(sql_models, yml_models)
-
-    return sql_models,yml_models
-
-
-
-
 
 
 def compare_file(sql_models, yml_models):
     models = 0
     docs = 0
     test = 0
-    model_col_width = 40
+    model_col_width = 50
     docs_col_width = 10
     docs_true = "True"
     docs_false = "False"
-
     for item in sql_models:
         models += 1
         if item in yml_models:
             if yml_models.get(item):
                 tested = "True"
-                print (f" Models: {item: <{model_col_width}}Docs: " + Fore.GREEN + f"{docs_true: <{docs_col_width}}" + Style.RESET_ALL + f"   Tests: " + Fore.GREEN + f"{tested}" + Style.RESET_ALL)
-                test +=1
+                print(
+                    f" Models: {item: <{model_col_width}}Docs: "
+                    + Fore.GREEN
+                    + f"{docs_true: <{docs_col_width}}"
+                    + Style.RESET_ALL
+                    + f"   Tests: "
+                    + Fore.GREEN
+                    + f"{tested}"
+                    + Style.RESET_ALL
+                )
+                test += 1
             else:
                 tested = "False"
-                print (f" Models: {item: <{model_col_width}}Docs: " + Fore.GREEN + f"{docs_true: <{docs_col_width}}" + Style.RESET_ALL + f"   Tests: " + Fore.RED + f"{tested}" + Style.RESET_ALL)
+                print(
+                    f" Models: {item: <{model_col_width}}Docs: "
+                    + Fore.GREEN
+                    + f"{docs_true: <{docs_col_width}}"
+                    + Style.RESET_ALL
+                    + f"   Tests: "
+                    + Fore.RED
+                    + f"{tested}"
+                    + Style.RESET_ALL
+                )
             docs += 1
         else:
             if not yml_models.get(item):
-                tested ="False"
-                print (f" Models: {item: <{model_col_width}}Docs: "+ Fore.RED + f"{docs_false: <{docs_col_width}}" + Style.RESET_ALL + f"   Tests: " + Fore.RED + f"{tested}" + Style.RESET_ALL)
+                tested = "False"
+                print(
+                    f" Models: {item: <{model_col_width}}Docs: "
+                    + Fore.RED
+                    + f"{docs_false: <{docs_col_width}}"
+                    + Style.RESET_ALL
+                    + f"   Tests: "
+                    + Fore.RED
+                    + f"{tested}"
+                    + Style.RESET_ALL
+                )
     print(" ")
-    #print (f" Models: {models}, Docs: {docs}, DocsCoverage: {round((docs /models) *100)}% Tests: {test}, TestsCoverage: {round((test /models) *100)}%")
-    print (f" Models: {models: <{model_col_width}}Docs: {docs} ({round((docs /models) *100)}%)    Tests: {test} ({round((test /models) *100)}%) ")
-
-
-
-
-
-
-
-
-
-
+    # print (f" Models: {models}, Docs: {docs}, DocsCoverage: {round((docs /models) *100)}% Tests: {test}, TestsCoverage: {round((test /models) *100)}%")
+    print(
+        f" Models: {models: <{model_col_width}}Docs: {docs} ({round((docs /models) *100)}%)    Tests: {test} ({round((test /models) *100)}%) "
+    )
