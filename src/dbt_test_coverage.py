@@ -22,17 +22,14 @@ def load_file_contents(path, strip=True):
 
     with open(path, "rb") as handle:
         to_return = handle.read().decode("utf-8")
-
     if strip:
         to_return = to_return.strip()
-
     return to_return
 
 
 def load_schema_yml(path):
     contents = load_file_contents(path)
     yml = load_yaml(contents)
-
     return yml
 
 
@@ -60,8 +57,7 @@ def parse_sources(schema):
                     model_name,
                     table_test,
                 ]
-            )
-
+                )
     # Calculate aggregated test status
     statuses = 0
     tested = 0
@@ -75,68 +71,10 @@ def parse_sources(schema):
     return test_status, test_status_agg
 
 
-def parse_models(schema):
+def get_models(schema):
     if not schema.get("models"):
         return None, None
-    # Create list of models and test status
-    test_status = []
-    for model in schema["models"]:
-        model_name = model["name"]
-        model_test = False
-        if "'tests':" in str(model):
-            model_test = True
-        # print(f"Model name: {model_name}, tested: {model_test}" )
-        # test_status.append([model_name, model_test])
-        test_status.append(model_name)
-
-    # Calculate aggregated test status
-    statuses = 0
-    tested = 0
-    for status in test_status:
-        statuses += 1
-        if status[1]:
-            tested += 1
-
-    test_status_agg = [statuses, tested, round(tested / statuses * 100)]
-
-    return test_status, test_status_agg
-
-
-def parse_schema(schema):
-
-    try:
-        source_results, source_results_agg = parse_sources(schema)
-        if source_results:
-            for source_result in source_results:
-                print(
-                    f"Source: {source_result[0]}, Database: {source_result[1]}, Schema: {source_result[2]}, "
-                    f"Table: {source_result[3]}, Model name: {source_result[4]}, Tested: {source_result[5]}"
-                )
-            print(" ")
-            print(
-                f"Sources: {source_results_agg[0]}, Tested: {str(source_results_agg[1])}, "
-                f"Coverage: {source_results_agg[2]}%"
-            )
-    except:
-        print("Failed to parse sources")
-
-    try:
-        model_results, model_results_agg = parse_models(schema)
-        if model_results:
-            for model_result in model_results:
-                print(f"Model: {model_result[0]}, Tested: {model_result[1]}")
-            print(" ")
-            print(
-                f"Models: {model_results_agg[0]}, Tested: {str(model_results_agg[1])}, "
-                f"Coverage: {model_results_agg[2]}%"
-            )
-    except:
-        print("Failed to parse models")
-
-    print("\n")
-
-
-def parse_schema_2(schema):
+    # Create dict of models and test status
     try:
         models = {}
         for model in schema["models"]:
@@ -148,7 +86,143 @@ def parse_schema_2(schema):
             models.update({name: tested})
         return models
     except:
-        print(f"Parse {schema} Failed")
+        None
+
+
+def get_sources(schema):
+    try:
+        source_results, source_results_agg = parse_sources(schema)
+        source_col_width = 20
+        model_col_width = 50
+        test_col_width = 10
+        source_agg_col_width = 77
+        sources_agg = 0
+        if source_results:
+            for source_result in source_results:
+                sources_agg += 1
+                documented = 'True'
+                # If yml sources has test
+                if source_result[5] == 1:
+                    tested = 'True'
+                    print(
+                        f" Source: {source_result[0]: <{source_col_width}}"                  
+                        f" Model: {source_result[4]: <{model_col_width}}"
+                        f" Docs: "
+                        + Fore.GREEN
+                        + f"{documented: <{test_col_width}}"
+                        + Style.RESET_ALL
+                        + f"Tests: "
+                        + Fore.GREEN
+                        + f"{tested: <{test_col_width}}"
+                        + Style.RESET_ALL
+                        + f" Source Table: {source_result[1]}.{source_result[2]}.{source_result[3]: <{model_col_width}}"
+                        )
+                # If yml sources doesn't have test
+                else:
+                    tested = 'False'
+                    print(
+                        f" Source: {source_result[0]: <{source_col_width}}"                      
+                        f" Model: {source_result[4]: <{model_col_width}}"
+                        f" Docs: "
+                        + Fore.GREEN
+                        + f"{documented: <{test_col_width}}"
+                        + Style.RESET_ALL
+                        + f"Tests: "
+                        + Fore.RED
+                        + f"{tested: <{test_col_width}}"
+                        + Style.RESET_ALL
+                        + f" Source Table: {source_result[1]}.{source_result[2]}.{source_result[3]: <{model_col_width}}"
+                    )
+            #print(" ")
+        print(
+            Fore.YELLOW +
+            f" Sources: {source_results_agg[0]: <{source_agg_col_width}}"
+            f" Docs: {(source_results_agg[0])} (100%) "           
+            f" Tests: {(source_results_agg[1])} ({source_results_agg[2]}%)"
+             + Style.RESET_ALL
+
+        )
+        print(" ")
+
+    except:
+        None
+
+def compare_files(sql_models, yml_models):
+    models = 0
+    docs = 0
+    test = 0
+    folder_col_width = 20
+    model_col_width = 50
+    docs_col_width = 10
+    model_agg_col_width = 78
+    docs_true = "True"
+    docs_false = "False"
+    for sql_s in sql_models:
+        item = sql_s[1]
+        sql_folder = sql_s[0]
+        models += 1
+        if item in yml_models:
+            # If yml models exists and has test
+            if yml_models.get(item):
+                tested = "True"
+                print(
+                    f" Folder: {sql_folder: <{folder_col_width}}"
+                    f" Model: {item: <{model_col_width}}"
+                    f" Docs: "
+                    + Fore.GREEN
+                    + f"{docs_true: <{docs_col_width}}"
+                    + Style.RESET_ALL
+                    + f"Tests: "
+                    + Fore.GREEN
+                    + f"{tested}"
+                    + Style.RESET_ALL
+                )
+                test += 1
+            # If yml models exists but doesn't have test
+            else:
+                tested = "False"
+                print(
+                    f" Folder: {sql_folder: <{folder_col_width}}"
+                    f" Model: {item: <{model_col_width}}"
+                    f" Docs: "
+                    + Fore.GREEN
+                    + f"{docs_true: <{docs_col_width}}"
+                    + Style.RESET_ALL
+                    + f"Tests: "
+                    + Fore.RED
+                    + f"{tested}"
+                    + Style.RESET_ALL
+                )
+            docs += 1
+        # If yml models doesn't exists
+        else:
+            if not yml_models.get(item):
+                tested = "False"
+                print(
+                    f" Folder: {sql_folder: <{folder_col_width}}"
+                    f" Model: {item: <{model_col_width}}"                   
+                    f" Docs: "
+                    + Fore.RED
+                    + f"{docs_false: <{docs_col_width}}"
+                    + Style.RESET_ALL
+                    + f"Tests: "
+                    + Fore.RED
+                    + f"{tested}"
+                    + Style.RESET_ALL
+                )
+    print(" ")
+    if models:
+        print(
+            Fore.YELLOW +
+            f" Models: {models: <{model_agg_col_width}}" 
+            f" Docs: {docs} ({round((docs / models) * 100)}%) " 
+            f" Tests: {test} ({round((test / models) * 100)}%)"
+            + Style.RESET_ALL
+        )
+        print(" ")
+
+    else:
+        print("No existing models in path")
 
 
 def test_coverage(path, recursive=True):
@@ -160,76 +234,50 @@ def test_coverage(path, recursive=True):
         sql_path = f"{path}/*.sql"
 
     ymls = glob.glob(schema_path, recursive=recursive)
+    ymls_source = glob.glob(schema_path, recursive=recursive)
+
     sqls = glob.glob(sql_path, recursive=recursive)
+    # Create a list of all sql files
     sql_models = []
     for sql_file_list in sqls:
+        sql_file_folder = os.path.basename(os.path.dirname(sql_file_list))
         sql_files = os.path.basename(sql_file_list)
-        sql_models.append(sql_files[:-4])
-
+        sql_models.append(
+            [
+                sql_file_folder,
+                sql_files[:-4]
+            ])
     if not ymls:
         print(f"No schema files found in: {path}")
         return
+
+    for yml in ymls_source:
+        schema = load_schema_yml(yml)
+        try:
+            # Select all yml sources with test details
+            get_sources(schema)
+
+        except:
+            None
+
     yml_models = {}
     for yml in ymls:
         schema = load_schema_yml(yml)
-        yml_model = parse_schema_2(schema)
-        yml_models = {**yml_models, **yml_model}
 
-    compare_file(sql_models, yml_models)
+        # Select all yml models wit test details
+        try:
+            yml_model = get_models(schema)
+            yml_models = {**yml_models, **yml_model}
+        except:
+            None
+
+    try:
+        compare_files(sql_models, yml_models)
+
+    except:
+        None
 
 
-def compare_file(sql_models, yml_models):
-    models = 0
-    docs = 0
-    test = 0
-    model_col_width = 50
-    docs_col_width = 10
-    docs_true = "True"
-    docs_false = "False"
-    for item in sql_models:
-        models += 1
-        if item in yml_models:
-            if yml_models.get(item):
-                tested = "True"
-                print(
-                    f" Models: {item: <{model_col_width}}Docs: "
-                    + Fore.GREEN
-                    + f"{docs_true: <{docs_col_width}}"
-                    + Style.RESET_ALL
-                    + f"   Tests: "
-                    + Fore.GREEN
-                    + f"{tested}"
-                    + Style.RESET_ALL
-                )
-                test += 1
-            else:
-                tested = "False"
-                print(
-                    f" Models: {item: <{model_col_width}}Docs: "
-                    + Fore.GREEN
-                    + f"{docs_true: <{docs_col_width}}"
-                    + Style.RESET_ALL
-                    + f"   Tests: "
-                    + Fore.RED
-                    + f"{tested}"
-                    + Style.RESET_ALL
-                )
-            docs += 1
-        else:
-            if not yml_models.get(item):
-                tested = "False"
-                print(
-                    f" Models: {item: <{model_col_width}}Docs: "
-                    + Fore.RED
-                    + f"{docs_false: <{docs_col_width}}"
-                    + Style.RESET_ALL
-                    + f"   Tests: "
-                    + Fore.RED
-                    + f"{tested}"
-                    + Style.RESET_ALL
-                )
-    print(" ")
-    # print (f" Models: {models}, Docs: {docs}, DocsCoverage: {round((docs /models) *100)}% Tests: {test}, TestsCoverage: {round((test /models) *100)}%")
-    print(
-        f" Models: {models: <{model_col_width}}Docs: {docs} ({round((docs /models) *100)}%)    Tests: {test} ({round((test /models) *100)}%) "
-    )
+
+
+
