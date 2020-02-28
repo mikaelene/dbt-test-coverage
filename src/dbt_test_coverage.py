@@ -135,11 +135,9 @@ def get_sources(schema):
                     )
             #print(" ")
         print(
-            Fore.YELLOW +
             f" Sources: {source_results_agg[0]: <{source_agg_col_width}}"
             f" Docs: {(source_results_agg[0])} (100%) "           
             f" Tests: {(source_results_agg[1])} ({source_results_agg[2]}%)"
-             + Style.RESET_ALL
 
         )
         print(" ")
@@ -147,9 +145,13 @@ def get_sources(schema):
     except:
         None
 
-def compare_files(sql_models, yml_models):
+
+def compare_files(sql_models, yml_models,unique_sql_folders):
+    models_agg = 0
     models = 0
     docs = 0
+    test_agg = 0
+    docs_agg = 0
     test = 0
     folder_col_width = 20
     model_col_width = 50
@@ -157,72 +159,91 @@ def compare_files(sql_models, yml_models):
     model_agg_col_width = 78
     docs_true = "True"
     docs_false = "False"
-    for sql_s in sql_models:
-        item = sql_s[1]
-        sql_folder = sql_s[0]
-        models += 1
-        if item in yml_models:
-            # If yml models exists and has test
-            if yml_models.get(item):
-                tested = "True"
-                print(
-                    f" Folder: {sql_folder: <{folder_col_width}}"
-                    f" Model: {item: <{model_col_width}}"
-                    f" Docs: "
-                    + Fore.GREEN
-                    + f"{docs_true: <{docs_col_width}}"
-                    + Style.RESET_ALL
-                    + f"Tests: "
-                    + Fore.GREEN
-                    + f"{tested}"
-                    + Style.RESET_ALL
-                )
-                test += 1
-            # If yml models exists but doesn't have test
-            else:
-                tested = "False"
-                print(
-                    f" Folder: {sql_folder: <{folder_col_width}}"
-                    f" Model: {item: <{model_col_width}}"
-                    f" Docs: "
-                    + Fore.GREEN
-                    + f"{docs_true: <{docs_col_width}}"
-                    + Style.RESET_ALL
-                    + f"Tests: "
-                    + Fore.RED
-                    + f"{tested}"
-                    + Style.RESET_ALL
-                )
-            docs += 1
-        # If yml models doesn't exists
+    for sql_folder in unique_sql_folders:
+        models = 0
+        test = 0
+        docs = 0
+        for sql_s in sql_models:
+            item = sql_s[1]
+            sql_folders = sql_s[0]
+            if sql_folder == sql_folders:
+                models_agg += 1
+                models += 1
+                if item in yml_models:
+                    # If yml models exists and has test
+                    if yml_models.get(item):
+                        tested = "True"
+                        test += 1
+                        test_agg += 1
+                        print(
+                            f" Folder: {sql_folder: <{folder_col_width}}"
+                            f" Model: {item: <{model_col_width}}"
+                            f" Docs: "
+                            + Fore.GREEN
+                            + f"{docs_true: <{docs_col_width}}"
+                            + Style.RESET_ALL
+                            + f"Tests: "
+                            + Fore.GREEN
+                            + f"{tested}"
+                            + Style.RESET_ALL
+                        )
+                    # If yml models exists but doesn't have test
+                    else:
+                        tested = "False"
+                        print(
+                            f" Folder: {sql_folder: <{folder_col_width}}"
+                            f" Model: {item: <{model_col_width}}"
+                            f" Docs: "
+                            + Fore.GREEN
+                            + f"{docs_true: <{docs_col_width}}"
+                            + Style.RESET_ALL
+                            + f"Tests: "
+                            + Fore.RED
+                            + f"{tested}"
+                            + Style.RESET_ALL
+                        )
+                    docs += 1
+                    docs_agg += 1
+
+                    # If yml models doesn't exists
+                else:
+                    if not yml_models.get(item):
+                        tested = "False"
+                        print(
+                            f" Folder: {sql_folder: <{folder_col_width}}"
+                            f" Model: {item: <{model_col_width}}"
+                            f" Docs: "
+                            + Fore.RED
+                            + f"{docs_false: <{docs_col_width}}"
+                            + Style.RESET_ALL
+                            + f"Tests: "
+                            + Fore.RED
+                            + f"{tested}"
+                            + Style.RESET_ALL
+                        )
+        if models:
+            print(
+                f" Models: {models: <{model_agg_col_width}}"
+                f" Docs: {docs} ({round((docs / models) * 100)}%) "
+                f" Tests: {test} ({round((test / models) * 100)}%)"
+            )
         else:
-            if not yml_models.get(item):
-                tested = "False"
-                print(
-                    f" Folder: {sql_folder: <{folder_col_width}}"
-                    f" Model: {item: <{model_col_width}}"                   
-                    f" Docs: "
-                    + Fore.RED
-                    + f"{docs_false: <{docs_col_width}}"
-                    + Style.RESET_ALL
-                    + f"Tests: "
-                    + Fore.RED
-                    + f"{tested}"
-                    + Style.RESET_ALL
-                )
-    print(" ")
-    if models:
-        print(
-            Fore.YELLOW +
-            f" Models: {models: <{model_agg_col_width}}" 
-            f" Docs: {docs} ({round((docs / models) * 100)}%) " 
-            f" Tests: {test} ({round((test / models) * 100)}%)"
-            + Style.RESET_ALL
-        )
+            print("No existing models in path")
         print(" ")
 
-    else:
-        print("No existing models in path")
+    print(f" TOTAL")
+    print(
+        f" Models: {models_agg: <{model_agg_col_width}}"
+        f" Docs: {docs_agg} ({round((docs_agg / models_agg) * 100)}%) "
+        f" Tests: {test_agg} ({round((test_agg / models_agg) * 100)}%)"
+        )
+
+    #else:
+    #    print("No existing models in path")
+
+    print(" ")
+
+
 
 
 def test_coverage(path, recursive=True):
@@ -235,7 +256,6 @@ def test_coverage(path, recursive=True):
 
     ymls = glob.glob(schema_path, recursive=recursive)
     ymls_source = glob.glob(schema_path, recursive=recursive)
-
     sqls = glob.glob(sql_path, recursive=recursive)
     # Create a list of all sql files
     sql_models = []
@@ -247,6 +267,13 @@ def test_coverage(path, recursive=True):
                 sql_file_folder,
                 sql_files[:-4]
             ])
+
+    sql_folders = []
+    for sql_file_list in sqls:
+        sql_file_folder = os.path.basename(os.path.dirname(sql_file_list))
+        sql_folders.append(sql_file_folder)
+        unique_sql_folders = list(set(sql_folders))
+
     if not ymls:
         print(f"No schema files found in: {path}")
         return
@@ -272,11 +299,10 @@ def test_coverage(path, recursive=True):
             None
 
     try:
-        compare_files(sql_models, yml_models)
+        compare_files(sql_models, yml_models,unique_sql_folders)
 
     except:
         None
-
 
 
 
