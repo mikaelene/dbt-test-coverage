@@ -18,6 +18,9 @@ setup(
     author_email="mikael.ene@gmail.com",
     url="https://github.com/mikaelene/dbt-test-coverage",
     packages=find_packages(),
-    install_requires=["PyYAML>=3.11",],
+    install_requires=[
+        "PyYAML>=3.11",
+        "colorama>=0.3.9",
+    ],
     entry_points={"console_scripts": ["dbt-test-coverage=src.main:main"],},
 )

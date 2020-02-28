@@ -1,1 +1,2 @@
-PyYaml
+PyYAML>=3.11
+colorama>=0.3.9

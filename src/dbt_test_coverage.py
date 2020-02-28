@@ -2,7 +2,7 @@ import glob
 import yaml
 import os
 import colorama
-from colorama import init, Fore, Back, Style
+from colorama import Fore, Style
 
 colorama.init()
 
@@ -86,7 +86,7 @@ def get_models(schema):
             models.update({name: tested})
         return models
     except:
-        None
+        pass
 
 
 def get_sources(schema):
@@ -133,7 +133,6 @@ def get_sources(schema):
                         + Style.RESET_ALL
                         + f" Source Table: {source_result[1]}.{source_result[2]}.{source_result[3]: <{model_col_width}}"
                     )
-            # print(" ")
         print(
             f" Sources: {source_results_agg[0]: <{source_agg_col_width}}"
             f" Docs: {(source_results_agg[0])} (100%) "
@@ -142,16 +141,13 @@ def get_sources(schema):
         print(" ")
 
     except:
-        None
+        pass
 
 
 def compare_files(sql_models, yml_models, unique_sql_folders):
     models_agg = 0
-    models = 0
-    docs = 0
     test_agg = 0
     docs_agg = 0
-    test = 0
     folder_col_width = 20
     model_col_width = 50
     docs_col_width = 10
@@ -235,12 +231,8 @@ def compare_files(sql_models, yml_models, unique_sql_folders):
         f" Models: {models_agg: <{model_agg_col_width}}"
         f" Docs: {docs_agg} ({round((docs_agg / models_agg) * 100)}%) "
         f" Tests: {test_agg} ({round((test_agg / models_agg) * 100)}%)"
+        f""
     )
-
-    # else:
-    #    print("No existing models in path")
-
-    print(" ")
 
 
 def test_coverage(path, recursive=True):
@@ -278,21 +270,22 @@ def test_coverage(path, recursive=True):
             get_sources(schema)
 
         except:
-            None
+            pass
 
     yml_models = {}
     for yml in ymls:
         schema = load_schema_yml(yml)
 
-        # Select all yml models wit test details
+        # Select all yml models with test details
         try:
             yml_model = get_models(schema)
             yml_models = {**yml_models, **yml_model}
         except:
-            None
+            pass
 
     try:
         compare_files(sql_models, yml_models, unique_sql_folders)
 
     except:
-        None
+        print("Failed to compare files")
+
