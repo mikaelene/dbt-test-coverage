@@ -57,7 +57,7 @@ def parse_sources(schema):
                     model_name,
                     table_test,
                 ]
-                )
+            )
     # Calculate aggregated test status
     statuses = 0
     tested = 0
@@ -100,12 +100,12 @@ def get_sources(schema):
         if source_results:
             for source_result in source_results:
                 sources_agg += 1
-                documented = 'True'
+                documented = "True"
                 # If yml sources has test
                 if source_result[5] == 1:
-                    tested = 'True'
+                    tested = "True"
                     print(
-                        f" Source: {source_result[0]: <{source_col_width}}"                  
+                        f" Source: {source_result[0]: <{source_col_width}}"
                         f" Model: {source_result[4]: <{model_col_width}}"
                         f" Docs: "
                         + Fore.GREEN
@@ -116,12 +116,12 @@ def get_sources(schema):
                         + f"{tested: <{test_col_width}}"
                         + Style.RESET_ALL
                         + f" Source Table: {source_result[1]}.{source_result[2]}.{source_result[3]: <{model_col_width}}"
-                        )
+                    )
                 # If yml sources doesn't have test
                 else:
-                    tested = 'False'
+                    tested = "False"
                     print(
-                        f" Source: {source_result[0]: <{source_col_width}}"                      
+                        f" Source: {source_result[0]: <{source_col_width}}"
                         f" Model: {source_result[4]: <{model_col_width}}"
                         f" Docs: "
                         + Fore.GREEN
@@ -133,12 +133,11 @@ def get_sources(schema):
                         + Style.RESET_ALL
                         + f" Source Table: {source_result[1]}.{source_result[2]}.{source_result[3]: <{model_col_width}}"
                     )
-            #print(" ")
+            # print(" ")
         print(
             f" Sources: {source_results_agg[0]: <{source_agg_col_width}}"
-            f" Docs: {(source_results_agg[0])} (100%) "           
+            f" Docs: {(source_results_agg[0])} (100%) "
             f" Tests: {(source_results_agg[1])} ({source_results_agg[2]}%)"
-
         )
         print(" ")
 
@@ -146,7 +145,7 @@ def get_sources(schema):
         None
 
 
-def compare_files(sql_models, yml_models,unique_sql_folders):
+def compare_files(sql_models, yml_models, unique_sql_folders):
     models_agg = 0
     models = 0
     docs = 0
@@ -236,14 +235,12 @@ def compare_files(sql_models, yml_models,unique_sql_folders):
         f" Models: {models_agg: <{model_agg_col_width}}"
         f" Docs: {docs_agg} ({round((docs_agg / models_agg) * 100)}%) "
         f" Tests: {test_agg} ({round((test_agg / models_agg) * 100)}%)"
-        )
+    )
 
-    #else:
+    # else:
     #    print("No existing models in path")
 
     print(" ")
-
-
 
 
 def test_coverage(path, recursive=True):
@@ -262,11 +259,7 @@ def test_coverage(path, recursive=True):
     for sql_file_list in sqls:
         sql_file_folder = os.path.basename(os.path.dirname(sql_file_list))
         sql_files = os.path.basename(sql_file_list)
-        sql_models.append(
-            [
-                sql_file_folder,
-                sql_files[:-4]
-            ])
+        sql_models.append([sql_file_folder, sql_files[:-4]])
 
     sql_folders = []
     for sql_file_list in sqls:
@@ -299,11 +292,7 @@ def test_coverage(path, recursive=True):
             None
 
     try:
-        compare_files(sql_models, yml_models,unique_sql_folders)
+        compare_files(sql_models, yml_models, unique_sql_folders)
 
     except:
         None
-
-
-
-
