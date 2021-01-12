@@ -19,7 +19,6 @@ def load_file_contents(path, strip=True):
     if not os.path.exists(path):
         # logger.error(path + " not found")
         print(path + " not found")
-
     with open(path, "rb") as handle:
         to_return = handle.read().decode("utf-8")
     if strip:
@@ -244,8 +243,10 @@ def test_coverage(path, recursive=True):
         sql_path = f"{path}/*.sql"
 
     ymls = glob.glob(schema_path, recursive=recursive)
-    ymls_source = glob.glob(schema_path, recursive=recursive)
+    ymls = [yml for yml in ymls if os.path.isfile(yml)]
+
     sqls = glob.glob(sql_path, recursive=recursive)
+
     # Create a list of all sql files
     sql_models = []
     for sql_file_list in sqls:
@@ -263,7 +264,7 @@ def test_coverage(path, recursive=True):
         print(f"No schema files found in: {path}")
         return
 
-    for yml in ymls_source:
+    for yml in ymls:
         schema = load_schema_yml(yml)
         try:
             # Select all yml sources with test details

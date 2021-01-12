@@ -32,11 +32,16 @@ Output for models will be something like:
     
     Models: 6, Tested: 1, Coverage: 17%
 
-## Good to know
-As of now, only the yml-files are parsed. The tool will not include undocumented models in the coverage report.
-
 
 ## Changelog
 
 ### v0.0.1
 Initial commit
+
+### v0.0.2
+First release
+
+### v0.0.3
+
+#### Fixes:
+- Fix error when yml-files are treated as directory.

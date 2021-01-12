@@ -15,7 +15,7 @@ setup(
     long_description=description,
     long_description_content_type="text/markdown",
     author="Mikael Ene",
-    author_email="mikael.ene@gmail.com",
+    author_email="mikael.ene@eneanalytics.com",
     url="https://github.com/mikaelene/dbt-test-coverage",
     packages=find_packages(),
     install_requires=[
