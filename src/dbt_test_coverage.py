@@ -289,4 +289,3 @@ def test_coverage(path, recursive=True):
 
     except:
         print("Failed to compare files")
-

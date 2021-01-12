@@ -22,5 +22,7 @@ setup(
         "PyYAML>=3.11",
         "colorama>=0.3.9",
     ],
-    entry_points={"console_scripts": ["dbt-test-coverage=src.main:main"],},
+    entry_points={
+        "console_scripts": ["dbt-test-coverage=src.main:main"],
+    },
 )
